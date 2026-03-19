@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subscription Guardian — Built with Adaptive AI</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    /* MongoDB-inspired palette */
+    --mongo-dark:     #001E2B;
+    --mongo-darker:   #001220;
+    --mongo-green:    #00ED64;
+    --mongo-green-dk: #00A548;
+    --mongo-blue:     #006CFA;
+    --mongo-blue-lt:  #0498EC;
+    --mongo-slate:    #21313C;
+    --mongo-mist:     #E8EDEB;
+    --mongo-fog:      #B8C4C2;
+    --mongo-white:    #FFFFFF;
+    --mongo-lavender: #F9EBFF;
+    --mongo-yellow:   #FFC010;
+    --mongo-coral:    #FF6F61;
+
+    --font-heading: 'DM Serif Display', Georgia, 'Times New Roman', serif;
+    --font-body:    'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--mongo-dark);
+    color: var(--mongo-mist);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── Slides ── */
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* ── Backgrounds ── */
+  .bg-hero {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 110%, rgba(0,237,100,0.08) 0%, transparent 60%),
+      linear-gradient(180deg, #001220 0%, var(--mongo-dark) 100%);
+  }
+  .bg-dark {
+    background: linear-gradient(180deg, var(--mongo-dark) 0%, #001220 100%);
+  }
+  .bg-teal {
+    background:
+      radial-gradient(ellipse 70% 50% at 30% 80%, rgba(0,108,250,0.07) 0%, transparent 60%),
+      linear-gradient(135deg, #001220 0%, var(--mongo-dark) 50%, #00161F 100%);
+  }
+  .bg-glow {
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 20%, rgba(0,237,100,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 40% at 30% 80%, rgba(0,108,250,0.05) 0%, transparent 50%),
+      var(--mongo-dark);
+  }
+
+  /* ── Typography ── */
+  h1 {
+    font-family: var(--font-heading);
+    font-size: 3.4rem;
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--mongo-white);
+  }
+  h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--mongo-white);
+  }
+  h3 {
+    font-family: var(--font-body);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--mongo-white);
+  }
+  p {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--mongo-fog);
+  }
+
+  .green-text  { color: var(--mongo-green); }
+  .blue-text   { color: var(--mongo-blue-lt); }
+  .yellow-text { color: var(--mongo-yellow); }
+  .coral-text  { color: var(--mongo-coral); }
+  .white-text  { color: var(--mongo-white); }
+
+  .gradient-title {
+    background: linear-gradient(135deg, var(--mongo-green), var(--mongo-blue-lt));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 28px 32px;
+  }
+  .card:hover {
+    border-color: rgba(0,237,100,0.2);
+    background: rgba(255,255,255,0.06);
+  }
+
+  /* ── Feature grid ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    max-width: 800px;
+    width: 100%;
+    margin-top: 36px;
+  }
+  .feature-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 24px;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+  }
+  .feature-card:hover {
+    background: rgba(255,255,255,0.06);
+    border-left-color: var(--mongo-green);
+    transform: translateY(-2px);
+  }
+  .feature-icon { font-size: 1.8rem; margin-bottom: 10px; }
+  .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+  .feature-card p  { font-size: 0.88rem; color: var(--mongo-fog); line-height: 1.5; }
+
+  /* ── Status table ── */
+  .status-table {
+    width: 100%;
+    max-width: 680px;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    margin-top: 28px;
+  }
+  .status-table th {
+    text-align: left;
+    padding: 8px 16px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--mongo-fog);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .status-table td {
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.03);
+    font-size: 0.95rem;
+  }
+  .status-table tr td:first-child { border-radius: 8px 0 0 8px; }
+  .status-table tr td:last-child  { border-radius: 0 8px 8px 0; }
+  .status-check { color: var(--mongo-green); font-weight: 700; }
+
+  /* ── Subscription table ── */
+  .sub-table {
+    width: 100%;
+    max-width: 820px;
+    border-collapse: collapse;
+    margin-top: 28px;
+  }
+  .sub-table th {
+    text-align: left;
+    padding: 12px 18px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--mongo-fog);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 2px solid rgba(0,237,100,0.15);
+  }
+  .sub-table td {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .sub-table .amount { color: var(--mongo-coral); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sub-table .date   { color: var(--mongo-blue-lt); font-variant-numeric: tabular-nums; }
+
+  /* ── Prompt block ── */
+  .prompt-block {
+    background: rgba(0,237,100,0.04);
+    border: 1px solid rgba(0,237,100,0.15);
+    border-left: 3px solid var(--mongo-green);
+    border-radius: 8px;
+    padding: 28px 32px;
+    max-width: 760px;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    color: var(--mongo-mist);
+    margin-top: 28px;
+    position: relative;
+  }
+  .prompt-block::before {
+    content: '"';
+    position: absolute;
+    top: -8px;
+    left: 24px;
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    color: rgba(0,237,100,0.25);
+  }
+
+  /* ── Tags ── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .tag-green  { background: rgba(0,237,100,0.12); color: var(--mongo-green); }
+  .tag-blue   { background: rgba(0,108,250,0.12); color: var(--mongo-blue-lt); }
+  .tag-coral  { background: rgba(255,111,97,0.12); color: var(--mongo-coral); }
+  .tag-yellow { background: rgba(255,192,16,0.12); color: var(--mongo-yellow); }
+  .tag-white  { background: rgba(255,255,255,0.08); color: var(--mongo-mist); }
+
+  /* ── Navigation ── */
+  .nav {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    z-index: 100;
+    background: rgba(0,18,32,0.85);
+    backdrop-filter: blur(12px);
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .nav-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .nav-dot.active { background: var(--mongo-green); transform: scale(1.35); box-shadow: 0 0 8px rgba(0,237,100,0.4); }
+  .nav-btn {
+    font-family: var(--font-body);
+    background: rgba(0,237,100,0.1);
+    border: 1px solid rgba(0,237,100,0.2);
+    color: var(--mongo-green);
+    padding: 7px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { background: rgba(0,237,100,0.2); }
+
+  /* ── Badge ── */
+  .badge {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 16px;
+    background: rgba(0,18,32,0.7);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--mongo-fog);
+    z-index: 100;
+  }
+
+  /* ── Progress bar ── */
+  .autoplay-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--mongo-green), var(--mongo-blue-lt));
+    transition: width 0.1s linear;
+    z-index: 200;
+  }
+
+  /* ── Flow ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .flow-step {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 14px 20px;
+    text-align: center;
+    min-width: 130px;
+  }
+  .flow-step .icon  { font-size: 1.4rem; margin-bottom: 4px; }
+  .flow-step .label { font-size: 0.82rem; color: var(--mongo-fog); font-weight: 500; }
+  .flow-arrow { color: var(--mongo-green); font-size: 1.3rem; }
+
+  /* ── Schedule ── */
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 680px;
+    width: 100%;
+    margin-top: 28px;
+  }
+  .schedule-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 28px 24px;
+    text-align: center;
+    border-top: 3px solid transparent;
+    transition: border-color 0.3s;
+  }
+  .schedule-card:first-child { border-top-color: var(--mongo-blue-lt); }
+  .schedule-card:last-child  { border-top-color: var(--mongo-green); }
+  .schedule-time {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    margin: 8px 0;
+  }
+
+  /* ── Total box ── */
+  .total-box {
+    background: rgba(0,237,100,0.05);
+    border: 1px solid rgba(0,237,100,0.15);
+    border-radius: 10px;
+    padding: 20px 40px;
+    margin-top: 24px;
+    text-align: center;
+  }
+  .total-amount {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    color: var(--mongo-green);
+  }
+
+  /* ── Stats row ── */
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 24px 20px;
+    text-align: center;
+    flex: 1;
+  }
+  .stat-number {
+    font-family: var(--font-heading);
+    font-size: 2.6rem;
+    color: var(--mongo-white);
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 0.88rem; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="autoplay-bar" id="progressBar"></div>
+
+<!-- Badge -->
+<div class="badge">
+  <span style="color:var(--mongo-green);">&#9679;</span> Built with Adaptive AI
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 1 : Title                          -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-hero active" id="slide-0">
+  <div style="text-align:center;">
+    <div style="margin-bottom:20px;">
+      <span class="tag tag-green" style="font-size:0.95rem;">Real Use Case Demo</span>
+    </div>
+    <h1 style="margin-bottom:18px;">
+      <span class="gradient-title">Subscription Guardian</span>
+    </h1>
+    <p style="font-size:1.3rem; max-width:620px; margin:0 auto 36px; color:var(--mongo-fog);">
+      An AI agent that automatically tracks every subscription hiding in your Gmail, organizes payments in Google Sheets, and sends weekly cost reports.
+    </p>
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <span class="tag tag-green">Gmail Scanner</span>
+      <span class="tag tag-blue">Google Sheets</span>
+      <span class="tag tag-coral">Calendar Alerts</span>
+      <span class="tag tag-yellow">Weekly Reports</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 2 : The Problem                    -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-dark" id="slide-1">
+  <div style="text-align:center; max-width:720px;">
+    <h2 style="margin-bottom:20px;">The Problem</h2>
+    <p style="font-size:1.25rem; color:var(--mongo-mist); margin-bottom:36px;">
+      Most people have no idea how much they spend on subscriptions each month. Charges pile up silently in Gmail and hit your bank account without warning.
+    </p>
+    <div style="display:flex; gap:20px; justify-content:center;">
+      <div class="stat-card">
+        <div class="stat-number">$181</div>
+        <div class="stat-label coral-text">Monthly hidden costs</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4+</div>
+        <div class="stat-label blue-text">Active subscriptions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">0</div>
+        <div class="stat-label yellow-text">Payment reminders</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 3 : One Prompt                     -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-teal" id="slide-2">
+  <div style="text-align:center; max-width:800px;">
+    <span class="tag tag-green" style="margin-bottom:16px; display:inline-block;">Step 1</span>
+    <h2 style="margin-bottom:10px;">One Prompt. That's It.</h2>
+    <p>I typed a single natural-language prompt into Adaptive AI:</p>
+    <div class="prompt-block" style="text-align:left;">
+      Build me a "Subscription Guardian" agent. Every morning at 8:00 AM Jakarta time, scan my Gmail inbox for subscription, invoice, and payment emails. Extract service name, dates, amount, currency, and billing frequency. Organize into a Google Sheet called "Subscription Tracker". Add Calendar reminders 3 days before each due date. Send a weekly Monday summary email with totals.
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 4 : What Adaptive Built            -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-dark" id="slide-3">
+  <div style="text-align:center; max-width:800px;">
+    <span class="tag tag-blue" style="margin-bottom:16px; display:inline-block;">Step 2</span>
+    <h2 style="margin-bottom:12px;">What Adaptive AI Built Automatically</h2>
+    <p>From that single prompt, Adaptive created a full automation pipeline:</p>
+    <div class="flow">
+      <div class="flow-step"><div class="icon">&#128231;</div><div class="label">Scan Gmail</div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="icon">&#129302;</div><div class="label">AI Extraction</div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="icon">&#128202;</div><div class="label">Google Sheet</div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="icon">&#128197;</div><div class="label">Calendar</div></div>
+      <div class="flow-arrow">&#8594;</div>
+      <div class="flow-step"><div class="icon">&#128236;</div><div class="label">Email Report</div></div>
+    </div>
+    <div class="feature-grid" style="margin-top:28px;">
+      <div class="feature-card">
+        <div class="feature-icon">&#128270;</div>
+        <h3 style="font-size:1.05rem;">Gmail AI Scanner</h3>
+        <p>Scans last 30 days of email for subscription-related messages using AI extraction</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128202;</div>
+        <h3 style="font-size:1.05rem;">Auto Google Sheet</h3>
+        <p>Creates "Subscription Tracker" with 8 columns, sorted by next due date</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128197;</div>
+        <h3 style="font-size:1.05rem;">Calendar Reminders</h3>
+        <p>Adds Google Calendar events 3 days before each payment due date</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128236;</div>
+        <h3 style="font-size:1.05rem;">Weekly Email Digest</h3>
+        <p>Monday 8AM summary with total costs, upcoming payments, new detections</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 5 : Everything Working             -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-glow" id="slide-4">
+  <div style="text-align:center; max-width:720px;">
+    <div style="font-size:2.8rem; margin-bottom:12px;">&#127881;</div>
+    <h2 style="margin-bottom:8px;">
+      <span class="green-text">Everything Working</span>
+    </h2>
+    <p>All 6 components deployed and verified live:</p>
+    <table class="status-table">
+      <thead>
+        <tr><th>Feature</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>&#128231; Gmail scanner (AI extraction)</td>
+          <td class="status-check">&#10003; Active</td>
+        </tr>
+        <tr>
+          <td>&#128202; Google Sheet "Subscription Tracker"</td>
+          <td class="status-check">&#10003; Created &amp; synced</td>
+        </tr>
+        <tr>
+          <td>&#128197; Calendar reminders (3 days before)</td>
+          <td class="status-check">&#10003; 3 events created</td>
+        </tr>
+        <tr>
+          <td>&#128236; Weekly summary email</td>
+          <td class="status-check">&#10003; Sent to inbox</td>
+        </tr>
+        <tr>
+          <td>&#9200; Daily 8AM cron job</td>
+          <td class="status-check">&#10003; Scheduled</td>
+        </tr>
+        <tr>
+          <td>&#9200; Monday 8AM email cron</td>
+          <td class="status-check">&#10003; Scheduled</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 6 : Subscriptions Found            -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-teal" id="slide-5">
+  <div style="text-align:center; max-width:850px;">
+    <h2 style="margin-bottom:8px;">Subscriptions Found from Gmail</h2>
+    <p>The agent scanned real email data and extracted these active subscriptions:</p>
+    <table class="sub-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Amount</th>
+          <th>Frequency</th>
+          <th>Next Due</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>&#129302; Anthropic</td>
+          <td class="amount">$80.13</td>
+          <td>Monthly</td>
+          <td class="date">Apr 19</td>
+          <td><span class="tag tag-green" style="font-size:0.72rem;">Active</span></td>
+        </tr>
+        <tr>
+          <td>&#128172; Claude Pro</td>
+          <td class="amount">$20.00</td>
+          <td>Monthly</td>
+          <td class="date">Apr 19</td>
+          <td><span class="tag tag-green" style="font-size:0.72rem;">Active</span></td>
+        </tr>
+        <tr>
+          <td>&#128172; Claude</td>
+          <td class="amount">$80.13</td>
+          <td>Monthly</td>
+          <td class="date">Apr 19</td>
+          <td><span class="tag tag-green" style="font-size:0.72rem;">Active</span></td>
+        </tr>
+        <tr>
+          <td>&#127769; Moonshot AI</td>
+          <td class="amount">$0.99</td>
+          <td>&#8212;</td>
+          <td class="date">Jan 21</td>
+          <td><span class="tag tag-green" style="font-size:0.72rem;">Active</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="total-box">
+      <div style="font-size:0.88rem; color:var(--mongo-fog); margin-bottom:2px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">Total Monthly Cost Tracked</div>
+      <div class="total-amount">$181.25</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 7 : Scheduled Agents               -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-dark" id="slide-6">
+  <div style="text-align:center; max-width:700px;">
+    <h2 style="margin-bottom:12px;">Runs Automatically, Every Day</h2>
+    <p>Two scheduled agents working 24/7 in the background:</p>
+    <div class="schedule-grid">
+      <div class="schedule-card">
+        <div style="font-size:2rem;">&#9728;&#65039;</div>
+        <div class="schedule-time blue-text">8:00 AM</div>
+        <h3 style="font-size:1rem;">Daily Gmail Scan</h3>
+        <p style="font-size:0.85rem; margin-top:8px;">Scans Gmail, updates Sheet, creates Calendar reminders</p>
+        <div class="tag tag-blue" style="margin-top:14px; font-size:0.72rem;">Every day &bull; Jakarta time</div>
+      </div>
+      <div class="schedule-card">
+        <div style="font-size:2rem;">&#128203;</div>
+        <div class="schedule-time green-text">8:00 AM</div>
+        <h3 style="font-size:1rem;">Weekly Summary Email</h3>
+        <p style="font-size:0.85rem; margin-top:8px;">Total costs, upcoming payments, new subscriptions detected</p>
+        <div class="tag tag-green" style="margin-top:14px; font-size:0.72rem;">Every Monday &bull; Jakarta time</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 8 : Why This Wins                  -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-glow" id="slide-7">
+  <div style="text-align:center; max-width:700px;">
+    <h2 style="margin-bottom:28px;">Why Subscription Guardian?</h2>
+    <div style="display:flex; flex-direction:column; gap:14px; text-align:left;">
+      <div class="card">
+        <h3 style="font-size:1.02rem;"><span class="green-text">&#10003;</span>&ensp;Real problem, real solution</h3>
+        <p style="font-size:0.92rem;">Average person wastes $133/month on forgotten subscriptions (C+R Research)</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1.02rem;"><span class="green-text">&#10003;</span>&ensp;Built from a single prompt</h3>
+        <p style="font-size:0.92rem;">No code, no configuration. Just plain English into Adaptive AI.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1.02rem;"><span class="green-text">&#10003;</span>&ensp;4 Google integrations working together</h3>
+        <p style="font-size:0.92rem;">Gmail Read + Send, Google Sheets, Google Calendar &#8212; seamlessly connected</p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:1.02rem;"><span class="green-text">&#10003;</span>&ensp;Fully autonomous</h3>
+        <p style="font-size:0.92rem;">Runs every day at 8AM with zero human intervention. Set it and forget it.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════ -->
+<!-- SLIDE 9 : CTA                            -->
+<!-- ═════════════════════════════════════════ -->
+<div class="slide bg-hero" id="slide-8">
+  <div style="text-align:center; max-width:620px;">
+    <div style="font-size:3.5rem; margin-bottom:16px;">&#128640;</div>
+    <h1 style="margin-bottom:18px;">
+      <span class="gradient-title">Built in minutes.<br>Saves money forever.</span>
+    </h1>
+    <p style="font-size:1.25rem; color:var(--mongo-mist); margin-bottom:36px;">
+      This is the power of Adaptive AI &#8212; turning a single idea into a fully working automation that runs itself.
+    </p>
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <span class="tag tag-green" style="font-size:0.95rem; padding:8px 20px;">adaptive.ai</span>
+      <span class="tag tag-white" style="font-size:0.95rem; padding:8px 20px;">@adaptiveai</span>
+    </div>
+    <p style="margin-top:44px; font-size:0.85rem; color:rgba(184,196,194,0.5);">
+      Built by @spmbtubel &bull; Adaptive AI Launch Week Competition 2026
+    </p>
+  </div>
+</div>
+
+<!-- ═══ Navigation ═══ -->
+<div class="nav">
+  <button class="nav-btn" onclick="prevSlide()">&#8592; Prev</button>
+  <div id="dots" style="display:flex; gap:7px;"></div>
+  <button class="nav-btn" onclick="nextSlide()">Next &#8594;</button>
+  <button class="nav-btn" id="autoBtn" onclick="toggleAutoplay()" style="margin-left:6px; background:rgba(0,237,100,0.08); border-color:rgba(0,237,100,0.2);">
+    &#9654; Auto
+  </button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsContainer = document.getElementById('dots');
+  const progressBar = document.getElementById('progressBar');
+  const autoBtn = document.getElementById('autoBtn');
+  let current = 0;
+  let autoplayInterval = null;
+  let autoplayTimer = null;
+  const AUTOPLAY_DELAY = 5000;
+
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => goToSlide(i);
+    dotsContainer.appendChild(dot);
+  });
+
+  function goToSlide(n) {
+    slides[current].classList.remove('active');
+    dotsContainer.children[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    dotsContainer.children[current].classList.add('active');
+    resetProgress();
+  }
+
+  function nextSlide() { goToSlide((current + 1) % slides.length); }
+  function prevSlide() { goToSlide((current - 1 + slides.length) % slides.length); }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+    if (e.key === 'a') toggleAutoplay();
+  });
+
+  let progressStart = 0;
+  function resetProgress() { progressStart = Date.now(); }
+
+  function toggleAutoplay() {
+    if (autoplayInterval) {
+      clearInterval(autoplayInterval);
+      clearInterval(autoplayTimer);
+      autoplayInterval = null;
+      autoplayTimer = null;
+      progressBar.style.width = '0%';
+      autoBtn.innerHTML = '&#9654; Auto';
+      autoBtn.style.background = 'rgba(0,237,100,0.08)';
+    } else {
+      resetProgress();
+      autoplayInterval = setInterval(nextSlide, AUTOPLAY_DELAY);
+      autoplayTimer = setInterval(() => {
+        const pct = Math.min(((Date.now() - progressStart) / AUTOPLAY_DELAY) * 100, 100);
+        progressBar.style.width = pct + '%';
+        if (pct >= 100) resetProgress();
+      }, 50);
+      autoBtn.innerHTML = '&#9724; Stop';
+      autoBtn.style.background = 'rgba(255,111,97,0.12)';
+    }
+  }
+</script>
+</body>
+</html>
